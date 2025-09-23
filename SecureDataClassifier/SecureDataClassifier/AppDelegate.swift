@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         window = UIWindow(frame: UIScreen.main.bounds)
         
-        let firstVC = ViewController()
+        let firstVC = GreetingViewController()
         let navigationController = UINavigationController(rootViewController: firstVC)
         window?.backgroundColor = .white
         

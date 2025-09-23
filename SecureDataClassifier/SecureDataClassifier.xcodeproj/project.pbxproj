@@ -18,6 +18,20 @@
 			);
 			target = 96EDEE1C2E7061EA000E8F1A /* SecureDataClassifier */;
 		};
+		96EDEFCE2E78657B000E8F1A /* Exceptions for "GreetingScreen" folder in "SecureDataClassifier" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				GreetingViewController.swift,
+			);
+			target = 96EDEE1C2E7061EA000E8F1A /* SecureDataClassifier */;
+		};
+		96EDEFD12E78718A000E8F1A /* Exceptions for "MainScreen" folder in "SecureDataClassifier" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				MainViewController.swift,
+			);
+			target = 96EDEE1C2E7061EA000E8F1A /* SecureDataClassifier */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -27,6 +41,27 @@
 				96EDEE2F2E7061EA000E8F1A /* Exceptions for "SecureDataClassifier" folder in "SecureDataClassifier" target */,
 			);
 			path = SecureDataClassifier;
+			sourceTree = "<group>";
+		};
+		96EDEFCB2E786576000E8F1A /* GreetingScreen */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				96EDEFCE2E78657B000E8F1A /* Exceptions for "GreetingScreen" folder in "SecureDataClassifier" target */,
+			);
+			path = GreetingScreen;
+			sourceTree = "<group>";
+		};
+		96EDEFCC2E786576000E8F1A /* MainScreen */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				96EDEFD12E78718A000E8F1A /* Exceptions for "MainScreen" folder in "SecureDataClassifier" target */,
+			);
+			path = MainScreen;
+			sourceTree = "<group>";
+		};
+		96EDEFCD2E786576000E8F1A /* ResultScreen */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ResultScreen;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -45,6 +80,9 @@
 		96EDEE142E7061EA000E8F1A = {
 			isa = PBXGroup;
 			children = (
+				96EDEFCB2E786576000E8F1A /* GreetingScreen */,
+				96EDEFCC2E786576000E8F1A /* MainScreen */,
+				96EDEFCD2E786576000E8F1A /* ResultScreen */,
 				96EDEE1F2E7061EA000E8F1A /* SecureDataClassifier */,
 				96EDEE1E2E7061EA000E8F1A /* Products */,
 			);
@@ -75,6 +113,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				96EDEE1F2E7061EA000E8F1A /* SecureDataClassifier */,
+				96EDEFCD2E786576000E8F1A /* ResultScreen */,
 			);
 			name = SecureDataClassifier;
 			packageProductDependencies = (
