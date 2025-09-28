@@ -136,6 +136,12 @@ public final class GreetingViewController: UIViewController {
         button.layer.cornerRadius = 12
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         button.addTarget(self, action: #selector(tapAction), for: .touchUpInside)
+        // 🔹 Тень
+        button.layer.shadowColor = Colors.grayDark.cgColor
+        button.layer.shadowOpacity = 0.7
+        button.layer.shadowOffset = CGSize(width: 0, height: 4)
+        button.layer.shadowRadius = 6
+        button.layer.masksToBounds = false
         
         return button
     }()
