@@ -305,7 +305,7 @@ final class MainViewController: UIViewController {
         
         scheduleInstructionAlert()
         setupNavigationBar()
-        calculateButton.isEnabled = false
+        calculateButton.isEnabled = true
         calculateButton.backgroundColor = Colors.grayLight
         deleteButton.addTarget(self, action: #selector(deleteAction), for: .touchUpInside)
         deleteButton.isHidden = true
@@ -322,7 +322,7 @@ final class MainViewController: UIViewController {
             action: #selector(questionTapped)
         )
         questionButton.tintColor = Colors.primaryBlue
-        navigationItem.leftBarButtonItem = questionButton
+        navigationItem.rightBarButtonItem = questionButton
     }
     
     
@@ -640,19 +640,30 @@ extension MainViewController {
         print("Способы доступа: \(accessWay ?? "—")")
         
         
-        let detaModel = SystemDataModel(
-            systemName: systemName,
-            category: category,
-            subjectsCount: subjectsCount,
-            purpose: purpose,
-            access: access,
-            accessWay: accessWay
+        let dataModel = SystemDataModel(
+            systemName: systemName!,
+            category: category!,
+            subjectsCount: subjectsCount!,
+            purpose: purpose!,
+            access: access!,
+            accessWay: accessWay!
         )
-        
-        AppData.shared.systemData = detaModel
         print("-------------------")
         
-        print(detaModel)
+        
+        
+        
+        AppData.shared.systemData = dataModel
+        
+        
+        print(dataModel)
+        
+        
+        let pdfModel = PDFDocumentModel(systemData: dataModel)
+        let pdfData = PDFGenerator.generate(from: pdfModel)
+        
+        let resultVC = ResultViewController(pdfData: pdfData)
+        navigationController?.pushViewController(resultVC, animated: true)
     }
     
     /// MARK: All delete
