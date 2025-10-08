@@ -305,7 +305,7 @@ final class MainViewController: UIViewController {
         
         scheduleInstructionAlert()
         setupNavigationBar()
-        calculateButton.isEnabled = true
+        calculateButton.isEnabled = false
         calculateButton.backgroundColor = Colors.grayLight
         deleteButton.addTarget(self, action: #selector(deleteAction), for: .touchUpInside)
         deleteButton.isHidden = true
