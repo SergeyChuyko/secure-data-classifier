@@ -185,6 +185,28 @@ final class MainViewController: UIViewController {
         
     }()
     
+    // MARK: - Loader Overlay
+
+    private lazy var loaderOverlay: UIView = {
+        let v = UIView()
+        v.translatesAutoresizingMaskIntoConstraints = false
+        v.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+        v.isHidden = true
+
+        let loader = SDCLoader()
+        loader.translatesAutoresizingMaskIntoConstraints = false
+        v.addSubview(loader)
+
+        NSLayoutConstraint.activate([
+            loader.centerXAnchor.constraint(equalTo: v.centerXAnchor),
+            loader.centerYAnchor.constraint(equalTo: v.centerYAnchor),
+            loader.widthAnchor.constraint(equalToConstant: 80),
+            loader.heightAnchor.constraint(equalToConstant: 80)
+        ])
+        return v
+    }()
+
+    
     // MARK: Доступ
     
     private let accessOptions = [
@@ -372,6 +394,8 @@ private extension MainViewController {
         view.addSubview(scrollView)
         view.addSubview(calculateButton)
         view.addSubview(deleteButton)
+        view.addSubview(loaderOverlay)
+
         
         scrollView.addSubview(contentView)
         contentView.addSubview(backgroundView)
@@ -414,6 +438,7 @@ private extension MainViewController {
         setupConstraintsForCalculateButton()
         setupConstraintsForDeleteButton()
         setupConstraintsForEmptyView()
+        setupConstraintsForLoader()
     }
     
     func setupConstraintsForScrollView() {
@@ -552,6 +577,15 @@ private extension MainViewController {
             deleteButton.widthAnchor.constraint(equalToConstant: 50)
         ])
     }
+    
+    func setupConstraintsForLoader() {
+        NSLayoutConstraint.activate([
+            loaderOverlay.topAnchor.constraint(equalTo: view.topAnchor),
+            loaderOverlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            loaderOverlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            loaderOverlay.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
 }
 
 // MARK: - Actions
@@ -628,42 +662,12 @@ extension MainViewController {
         showCustomInstructionAlert()
     }
     
-    
     /// MARK: Calculate
     @objc private func calculateAction() {
-        print("→ Нажата кнопка Рассчитать")
-        print("Название ИС: \(systemName ?? "—")")
-        print("Категория ПДн: \(category ?? "—")")
-        print("Количество субъектов: \(subjectsCount?.description ?? "—")")
-        print("Цель обработки: \(purpose ?? "—")")
-        print("Кто имеет доступ: \(access ?? "—")")
-        print("Способы доступа: \(accessWay ?? "—")")
-        
-        
-        let dataModel = SystemDataModel(
-            systemName: systemName!,
-            category: category!,
-            subjectsCount: subjectsCount!,
-            purpose: purpose!,
-            access: access!,
-            accessWay: accessWay!
-        )
-        print("-------------------")
-        
-        
-        
-        
-        AppData.shared.systemData = dataModel
-        
-        
-        print(dataModel)
-        
-        
-        let pdfModel = PDFDocumentModel(systemData: dataModel)
-        let pdfData = PDFGenerator.generate(from: pdfModel)
-        
-        let resultVC = ResultViewController(pdfData: pdfData)
-        navigationController?.pushViewController(resultVC, animated: true)
+        logInputData()
+        dismissKeyboardCustom()
+        showLoaderOverlay()
+        simulateProcessing()
     }
     
     /// MARK: All delete
@@ -882,5 +886,86 @@ extension MainViewController {
         view.endEditing(true)
         updateCalculateButtonState()
         updateDeleteButtonState()
+    }
+}
+
+// MARK: - Loader Helpers
+
+private extension MainViewController {
+
+    func showLoaderOverlay() {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = scene.windows.first else { return }
+        
+        loaderOverlay.translatesAutoresizingMaskIntoConstraints = false
+        window.addSubview(loaderOverlay)
+
+        NSLayoutConstraint.activate([
+            loaderOverlay.topAnchor.constraint(equalTo: window.topAnchor),
+            loaderOverlay.leadingAnchor.constraint(equalTo: window.leadingAnchor),
+            loaderOverlay.trailingAnchor.constraint(equalTo: window.trailingAnchor),
+            loaderOverlay.bottomAnchor.constraint(equalTo: window.bottomAnchor)
+        ])
+
+        loaderOverlay.layoutIfNeeded()
+        loaderOverlay.alpha = 0
+        loaderOverlay.isHidden = false
+        
+        UIView.animate(withDuration: 0.2) {
+            self.loaderOverlay.alpha = 1
+        }
+    }
+
+    func hideLoaderOverlay() {
+        UIView.animate(withDuration: 0.2, animations: {
+            self.loaderOverlay.alpha = 0
+        }, completion: { _ in
+            self.loaderOverlay.removeFromSuperview()
+        })
+    }
+}
+
+// MARK: - Private helpers
+
+private extension MainViewController {
+    
+    func logInputData() {
+        print("→ Нажата кнопка Рассчитать")
+        print("Название ИС: \(systemName ?? "—")")
+        print("Категория ПДн: \(category ?? "—")")
+        print("Количество субъектов: \(subjectsCount ?? "—")")
+        print("Цель обработки: \(purpose ?? "—")")
+        print("Кто имеет доступ: \(access ?? "—")")
+        print("Способы доступа: \(accessWay ?? "—")")
+    }
+    
+    func simulateProcessing() {
+        let delay = Double.random(in: 2...6)
+        print("⏳ Задержка \(String(format: "%.1f", delay)) сек.")
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            self?.hideLoaderOverlay()
+            self?.proceedToResult()
+        }
+    }
+    
+    func proceedToResult() {
+        guard self != nil else { return }
+        
+        let dataModel = SystemDataModel(
+            systemName: systemName!,
+            category: category!,
+            subjectsCount: subjectsCount!,
+            purpose: purpose!,
+            access: access!,
+            accessWay: accessWay!
+        )
+        
+        AppData.shared.systemData = dataModel
+        
+        let pdfModel = PDFDocumentModel(systemData: dataModel)
+        let pdfData = PDFGenerator.generate(from: pdfModel)
+        let resultVC = ResultViewController(pdfData: pdfData)
+        navigationController?.pushViewController(resultVC, animated: true)
     }
 }
