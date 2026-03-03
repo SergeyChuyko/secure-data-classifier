@@ -12,4 +12,6 @@ final class AppData {
     private init() {}
 
     var systemData: SystemDataModel?
+
+    var pdfHistory: [PDFHistoryItem] = []
 }

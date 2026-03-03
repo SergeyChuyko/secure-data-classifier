@@ -7,6 +7,7 @@
 
 import UIKit
 import PDFKit
+import RealmSwift
 
 // MARK: - ResultViewController
 
@@ -173,35 +174,63 @@ private extension ResultViewController {
             pdfView.document = document
         }
     }
+    
+    func updatePDF(with data: Data) {
+        if let document = PDFDocument(data: data) {
+            pdfView.document = document
+        }
+    }
 }
 
 // MARK: - Actions
 
 private extension ResultViewController {
-    
-    @objc func savePDF() {
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("Result.pdf")
+
+    func saveToHistory(pdfData: Data) {
+        let fileName = UUID().uuidString + ".pdf"
+        let url = FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)
+            .first!
+            .appendingPathComponent(fileName)
+
         do {
-            try pdfData.write(to: tempURL)
-            let activityVC = UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
-            activityVC.popoverPresentationController?.sourceView = view
-            present(activityVC, animated: true)
+            try pdfData.write(to: url)
+
+            let realm = try Realm()
+            try realm.write {
+                let obj = PDFHistoryObject()
+                obj.title = AppData.shared.systemData?.systemName ?? "Без названия"
+                obj.date = Date()
+                obj.filePath = url.path
+                realm.add(obj)
+            }
+
+            print("📄 PDF сохранён в Realm: \(url.path)")
+
         } catch {
-            print("Ошибка сохранения PDF: \(error.localizedDescription)")
+            print("❌ Ошибка сохранения PDF: \(error)")
         }
-    }
-    
-    @objc func historyTapped() {
-        guard let fileURL = Bundle.main.url(forResource: "12341234", withExtension: "pdf"),
-              let document = PDFDocument(url: fileURL) else {
-            print("⚠️ Не удалось найти или открыть файл 12341234.pdf")
-            return
-        }
-        
-        pdfView.document = document
-        print("📖 История — показан PDF 12341234.pdf")
     }
 
+    @objc func savePDF() {
+        saveToHistory(pdfData: pdfData)
+
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("Result.pdf")
+        try? pdfData.write(to: tempURL)
+
+        let activityVC = UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
+        present(activityVC, animated: true)
+    }
+
+    @objc func historyTapped() {
+        let historyVC = PDFHistoryViewController()
+        historyVC.delegate = self
+        if let sheet = historyVC.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        present(historyVC, animated: true)
+    }
 }
 
 //MARK: - Nav Bar Setup
@@ -218,5 +247,17 @@ private extension ResultViewController {
         )
         questionButton.tintColor = Colors.primaryBlue
         navigationItem.rightBarButtonItem = questionButton
+    }
+}
+
+extension ResultViewController: PDFHistorySelectionDelegate {
+    func didSelectPDF(data: Data) {
+        print("🔥 Получили PDF из истории!")
+        
+        if let document = PDFDocument(data: data) {
+            pdfView.document = document
+        } else {
+            print("❌ Не удалось создать документ из Data")
+        }
     }
 }

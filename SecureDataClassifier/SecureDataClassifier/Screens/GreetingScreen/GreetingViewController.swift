@@ -42,90 +42,13 @@ public final class GreetingViewController: UIViewController {
         return label
     }()
     
-    private lazy var mainStack: UIStackView = {
-        let stack = UIStackView()
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.axis = .vertical
-        stack.spacing = 16
-        stack.alignment = .fill
-        stack.distribution = .fill
-        
-        return stack
-    }()
-    
-    private lazy var backgroundForMainTitle: UIView = {
-        let view = UIView()
-        view.backgroundColor = Colors.primaryBlue
-        view.layer.cornerRadius = 8
+    private lazy var infoView: SDCInfoAboutApplication = {
+        let view = SDCInfoAboutApplication()
         view.translatesAutoresizingMaskIntoConstraints = false
-        
+
         return view
     }()
-    
-    private lazy var mainTitle: UILabel = {
-        let label = UILabel()
-        label.text = "Инструмент классификации и защиты информационных систем"
-        label.textAlignment = .left
-        label.font = UIFont.systemFont(ofSize: 18, weight: .regular)
-        label.textColor = Colors.textWhite
-        label.layer.cornerRadius = 8
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.numberOfLines = 0
-        label.clipsToBounds = true
-        
-        return label
-    }()
-    
-    private lazy var backgroundForDescriptionLabel: UIView = {
-        let view = UIView()
-        view.backgroundColor = Colors.lightBlue
-        view.layer.cornerRadius = 12
-        view.translatesAutoresizingMaskIntoConstraints = false
-        
-        return view
-    }()
-    
-    private lazy var descriptionLabel: UILabel = {
-        let label = UILabel()
-        label.numberOfLines = 0
-        label.textAlignment = .left
-        
-        let fullText = """
-        В нём вы можете:
-        
-        • Определять категорию персональных данных (общие, специальные, биометрические)
-        • Указывать количество субъектов персональных данных
-        • Задавать цели обработки информации
-        • Настраивать доступ и способы взаимодействия пользователей с данными
-        • Формировать отчёты для дальнейшей работы и документирования
-        • Автоматически подбирать меры защиты в соответствии с требованиями
-        """
-        
-        let attributed = NSMutableAttributedString(
-            string: fullText,
-            attributes: [
-                .font: UIFont.systemFont(ofSize: 18, weight: .regular),
-                .foregroundColor: Colors.textBlack
-            ]
-        )
-        
-        if let range = fullText.range(of: "В нём вы можете:") {
-            let nsRange = NSRange(range, in: fullText)
-            attributed.addAttribute(
-                .font,
-                value: UIFont.systemFont(ofSize: 18, weight: .bold),
-                range: nsRange
-            )
-        }
-        
-        label.attributedText = attributed
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.backgroundColor = Colors.lightBlue
-        label.layer.cornerRadius = 12
-        label.clipsToBounds = true
-        
-        return label
-    }()
+
     
     private lazy var goButton: UIButton = {
         let button = UIButton(type: .system)
@@ -173,22 +96,13 @@ private extension GreetingViewController {
     
     func addSubviews() {
         view.addSubview(greetingLabel)
-        view.addSubview(backgroundForDescriptionLabel)
+        view.addSubview(infoView)
         view.addSubview(goButton)
-        
-        backgroundForDescriptionLabel.addSubview(mainStack)
-        
-        mainStack.addArrangedSubview(backgroundForMainTitle)
-        backgroundForMainTitle.addSubview(mainTitle)
-        
-        mainStack.addArrangedSubview(descriptionLabel)
     }
     
     func setupConstraints() {
         setupConstraintsForGreetingLabel()
-        setupConstraintsForBackgroundDescriptionLabel()
-        setupConstraintsForMainStack()
-        setupConstraintsForMainTitle()
+        setupConstraintsForInfoView()
         setupConstraintsForGoButton()
     }
     
@@ -200,29 +114,11 @@ private extension GreetingViewController {
         ])
     }
     
-    func setupConstraintsForBackgroundDescriptionLabel() {
+    func setupConstraintsForInfoView() {
         NSLayoutConstraint.activate([
-            backgroundForDescriptionLabel.topAnchor.constraint(equalTo: greetingLabel.bottomAnchor, constant: Constants.descriptionTopInset),
-            backgroundForDescriptionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Constants.horizontalInset),
-            backgroundForDescriptionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Constants.horizontalInset)
-        ])
-    }
-    
-    func setupConstraintsForMainStack() {
-        NSLayoutConstraint.activate([
-            mainStack.topAnchor.constraint(equalTo: backgroundForDescriptionLabel.topAnchor, constant: Constants.spacing),
-            mainStack.leadingAnchor.constraint(equalTo: backgroundForDescriptionLabel.leadingAnchor, constant: Constants.spacing),
-            mainStack.trailingAnchor.constraint(equalTo: backgroundForDescriptionLabel.trailingAnchor, constant: -Constants.spacing),
-            mainStack.bottomAnchor.constraint(equalTo: backgroundForDescriptionLabel.bottomAnchor, constant: -Constants.spacing)
-        ])
-    }
-    
-    func setupConstraintsForMainTitle() {
-        NSLayoutConstraint.activate([
-            mainTitle.topAnchor.constraint(equalTo: backgroundForMainTitle.topAnchor, constant: 8),
-            mainTitle.leadingAnchor.constraint(equalTo: backgroundForMainTitle.leadingAnchor, constant: 8),
-            mainTitle.trailingAnchor.constraint(equalTo: backgroundForMainTitle.trailingAnchor, constant: -8),
-            mainTitle.bottomAnchor.constraint(equalTo: backgroundForMainTitle.bottomAnchor, constant: -8)
+            infoView.topAnchor.constraint(equalTo: greetingLabel.bottomAnchor, constant: 55),
+            infoView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            infoView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
     }
     

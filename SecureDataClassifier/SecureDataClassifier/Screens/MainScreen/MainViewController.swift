@@ -9,6 +9,8 @@ import UIKit
 
 final class MainViewController: UIViewController {
     
+    
+    
     //MARK: - Constants
     
     private enum Constants {
@@ -53,7 +55,8 @@ final class MainViewController: UIViewController {
         accessField,
         accessWayField
     ]
-    
+    weak var delegate: PDFHistorySelectionDelegate?
+
     // MARK: - UI
     
     private lazy var scrollView: UIScrollView = {
@@ -332,6 +335,7 @@ final class MainViewController: UIViewController {
         deleteButton.addTarget(self, action: #selector(deleteAction), for: .touchUpInside)
         deleteButton.isHidden = true
         hideKeyboardWhenTappedAround(action: #selector(dismissKeyboardCustom))
+        saveDefaults()
     }
     
     
@@ -344,7 +348,18 @@ final class MainViewController: UIViewController {
             action: #selector(questionTapped)
         )
         questionButton.tintColor = Colors.primaryBlue
-        navigationItem.rightBarButtonItem = questionButton
+        
+        let historyIcon = UIImage(systemName: "folder.circle.fill")
+        let historyButton = UIBarButtonItem(
+            image: historyIcon,
+            style: .plain,
+            target: self,
+            action: #selector(historyTapped)
+        )
+        historyButton.tintColor = .red
+        
+        navigationItem.rightBarButtonItem = historyButton
+        navigationItem.leftBarButtonItem = questionButton
     }
     
     
@@ -657,9 +672,21 @@ extension MainViewController {
     }
     
     
-    /// MARK: Navigation
+    /// MARK: Navigation - info
     @objc func questionTapped() {
-        showCustomInstructionAlert()
+        showCustomInfoAlert()
+    }
+    
+    /// MARK: Navigation - history
+    @objc func historyTapped() {
+        print("Нажал на историю")
+        let historyVC = PDFHistoryViewController()
+        historyVC.delegate = self
+        if let sheet = historyVC.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        present(historyVC, animated: true)
     }
     
     /// MARK: Calculate
@@ -951,21 +978,46 @@ private extension MainViewController {
     
     func proceedToResult() {
         guard self != nil else { return }
-        
+
         let dataModel = SystemDataModel(
-            systemName: systemName!,
-            category: category!,
-            subjectsCount: subjectsCount!,
-            purpose: purpose!,
-            access: access!,
-            accessWay: accessWay!
+            systemName: systemName ?? "—",
+            category: category ?? "Общие",
+            subjectsCount: subjectsCount ?? "0",
+            purpose: purpose ?? "Не указана",
+            access: access ?? "administrator",
+            accessWay: accessWay ?? "local"
         )
-        
+
         AppData.shared.systemData = dataModel
+        
         
         let pdfModel = PDFDocumentModel(systemData: dataModel)
         let pdfData = PDFGenerator.generate(from: pdfModel)
+        let title = dataModel.systemName
+        PDFStorageManager.savePDF(pdfData, title: title)
+
         let resultVC = ResultViewController(pdfData: pdfData)
+        navigationController?.pushViewController(resultVC, animated: true)
+
+        
+        
+    }
+
+}
+
+//MARK: - Setup UserDefaults
+
+private extension MainViewController {
+     func saveDefaults() {
+         UserDefaults.standard.set(true, forKey: UserDefaultsKeys.hasLaunchedBefore)
+    }
+}
+
+extension MainViewController: PDFHistorySelectionDelegate {
+    func didSelectPDF(data: Data) {
+        print("🔥 Получили PDF из истории!")
+
+        let resultVC = ResultViewController(pdfData: data)
         navigationController?.pushViewController(resultVC, animated: true)
     }
 }
